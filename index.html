@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Área privada de pilotos ACC</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+            url("fondo.jpg");
+
+      background-size: cover;
+      background-position: center 30%;
+      background-repeat: no-repeat;
+      
+      color: #1f2937;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 760px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .header {
+      background: #111827;
+      color: white;
+      padding: 28px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #d1d5db;
+      font-size: 15px;
+    }
+
+    .content {
+      padding: 28px;
+    }
+
+    .login-box label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 600;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    .login-box button,
+    .logout-btn {
+      margin-top: 18px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .login-box button:hover,
+    .logout-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .error {
+      margin-top: 12px;
+      color: #dc2626;
+      font-size: 14px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .welcome {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .welcome-info h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .session-name {
+      margin: 6px 0 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .event-name {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .file-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 18px;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      background: #f9fafb;
+    }
+
+    .file-info h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .file-info p {
+      margin: 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .countdown {
+      margin-top: 8px !important;
+      font-size: 12px !important;
+      color: #2563eb !important;
+      font-weight: 600;
+    }
+
+    .download-btn {
+      text-decoration: none;
+      background: #2563eb;
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-weight: bold;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    .download-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .download-btn.disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .note {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 700px) {
+      .file-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .download-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Área privada de pilotos ACC</h1>
+      <p>Introduce tus datos para acceder a los archivos de tu sesión.</p>
+    </div>
+
+    <div class="content">
+      <div id="loginBox" class="login-box">
+        <label for="name">Nombre y apellido</label>
+        <input
+          type="text"
+          id="name"
+          placeholder="Escribe tu nombre completo"
+        />
+
+        <label for="password">Contraseña</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Escribe tu contraseña"
+          onkeydown="if(event.key==='Enter'){login()}"
+        />
+
+        <button onclick="login()">Entrar</button>
+        <div id="error" class="error"></div>
+        <div class="note">Tu acceso quedará registrado.</div>
+      </div>
+
+      <div id="panel" class="hidden">
+        <div class="welcome">
+          <div class="welcome-info">
+            <h2 id="clientName"></h2>
+            <p id="sessionName" class="session-name"></p>
+            <p id="eventName" class="event-name"></p>
+          </div>
+          <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+        </div>
+
+        <div id="fileList" class="file-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_uLxRKIZS6WlKj414tTwPELu4bsy_Mc8fZ2KUtRTwtL323cJ7gTC449szbDiBM5M/exec";
+    const NOMBRE_PRUEBA = "CRSTV | Rallysprint Misiones";
+
+    function getSpainTime() {
+      const now = new Date();
+      return new Date(now.toLocaleString("en-US", { timeZone: "Europe/Madrid" }));
+    }
+
+    function isVisible(file) {
+      const now = getSpainTime();
+
+      if (file.visibleFrom && now < new Date(file.visibleFrom)) {
+        return false;
+      }
+
+      if (file.visibleUntil && now > new Date(file.visibleUntil)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function getCountdownText(file) {
+      const now = getSpainTime();
+
+      if (file.visibleFrom && now < new Date(file.visibleFrom)) {
+        const diff = new Date(file.visibleFrom) - now;
+
+        const totalSeconds = Math.ceil(diff / 1000);
+
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        if (days > 0) {
+          return `Disponible en ${days}d ${hours}h`;
+        }
+
+        if (hours > 0) {
+          return `Disponible en ${hours}h ${minutes}m`;
+        }
+
+        if (minutes > 0) {
+          return `Disponible en ${minutes}m ${seconds}s`;
+        }
+
+        return `Disponible en ${seconds}s`;
+      }
+
+      return "";
+    }
+
+    const clients = {
+      "75c18mis": {
+        name: "Sesion C",
+        files: [
+          {
+            title: "Pack Skins",
+            description: "Archivo comprimido con las skins de la sesión.",
+            path: "archivos/sesion-c/skins-c.zip",
+            button: "Descargar Pack",
+            type: "download",
+            visibleFrom: "2026-04-04T16:00:00",
+            visibleUntil: "2026-04-04T19:15:00"
+          },
+          {
+            title: "Tramo",
+            description: "Archivo comprimido con el tramo de la prueba.",
+            path: "archivos/sesion-c/tramo-misiones.zip",
+            button: "Descargar Tramo",
+            type: "download",
+            visibleFrom: "2026-04-04T16:00:00",
+            visibleUntil: "2026-04-04T19:15:00"
+          },
+          {
+            title: "Coches",
+            description: "Archivo comprimido con los coches que se necesitan para entrar al servidor de la prueba.",
+            path: "archivos/sesion-c/coches.zip",
+            button: "Descargar Coches",
+            type: "download"
+          },
+          {
+            title: "Live-Timing Servidor",
+            description: "Enlace directo al live-timing del servidor oficial.",
+            path: "http://de1.acorsahostinges.de:12106/live-timing",
+            button: "Ir al live-timing",
+            type: "link"
+          },
+          {
+            title: "Enlace Directo Servidor",
+            description: "Enlace directo al servidor oficial.",
+            path: "https://acstuff.ru/s/q:race/online/join?httpPort=14106&ip=89.58.47.218",
+            button: "Acceder al servidor",
+            type: "link"
+          }
+        ]
+      },
+
+      "903d7mis": {
+        name: "Sesion D",
+        files: [
+          {
+            title: "Pack Skins",
+            description: "Archivo comprimido con las skins de la sesión.",
+            path: "https://drive.google.com/file/d/1EoLgJuH15GDK8wUW_CR1eaKYt-qZpQXO/view?usp=sharing",
+            button: "Descargar Pack",
+            type: "link",
+            visibleFrom: "2026-04-05T14:00:00",
+            visibleUntil: "2026-04-05T16:50:00"
+          },
+          {
+            title: "Tramo",
+            description: "Archivo comprimido con el tramo de la prueba.",
+            path: "https://www.swisstransfer.com/d/6915d37f-a26b-4311-acce-a92e4315c6bc",
+            button: "Descargar Tramo",
+            type: "link",
+            visibleFrom: "2026-04-05T14:00:00",
+            visibleUntil: "2026-04-05T16:50:00"
+          },
+          {
+            title: "Coches",
+            description: "Archivo comprimido con los coches que se necesitan para entrar al servidor de la prueba.",
+            path: "https://www.swisstransfer.com/d/b876402a-f743-42b4-9205-bfcc8d757fdc",
+            button: "Descargar Coches",
+            type: "link"
+          },
+          {
+            title: "Live-Timing Servidor",
+            description: "Enlace directo al live-timing del servidor oficial.",
+            path: "http://de1.acorsahostinges.de:12106/live-timing",
+            button: "Ir al live-timing",
+            type: "link"
+          },
+          {
+            title: "Enlace Directo Servidor",
+            description: "Enlace directo al servidor oficial.",
+            path: "https://acstuff.ru/s/q:race/online/join?httpPort=14106&ip=89.58.47.218",
+            button: "Acceder al servidor",
+            type: "link"
+          }
+        ]
+      }
+    };
+
+    async function registrarAcceso(nombre, password, sesion) {
+      if (!APPS_SCRIPT_URL) {
+        console.warn("Falta configurar APPS_SCRIPT_URL");
+        return;
+      }
+
+      const payload = {
+        fechaISO: new Date().toISOString(),
+        nombre: nombre,
+        password: password,
+        sesion: sesion,
+        userAgent: navigator.userAgent
+      };
+
+      await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    function renderFiles(client) {
+      const fileList = document.getElementById("fileList");
+      fileList.innerHTML = "";
+
+      const filesToShow = client.files.filter(file => {
+        const now = getSpainTime();
+
+        if (file.visibleUntil && now > new Date(file.visibleUntil)) {
+          return false;
+        }
+
+        return true;
+      });
+
+      if (filesToShow.length === 0) {
+        fileList.innerHTML = `
+          <div class="file-item">
+            <div class="file-info">
+              <h3>No hay archivos disponibles ahora mismo</h3>
+              <p>Vuelve a intentarlo dentro del horario habilitado para tu sesión.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      filesToShow.forEach(file => {
+        const item = document.createElement("div");
+        item.className = "file-item";
+
+        const visible = isVisible(file);
+        const countdownText = getCountdownText(file);
+
+        let actionHTML = "";
+
+        if (visible) {
+          actionHTML = file.type === "link"
+            ? `<a class="download-btn" href="${file.path}" target="_blank" rel="noopener noreferrer">${file.button}</a>`
+            : `<a class="download-btn" href="${file.path}" download>${file.button}</a>`;
+        } else {
+          actionHTML = `<span class="download-btn disabled">Próximamente</span>`;
+        }
+
+        item.innerHTML = `
+          <div class="file-info">
+            <h3>${file.title}</h3>
+            <p>${file.description}</p>
+            ${countdownText ? `<p class="countdown">${countdownText}</p>` : ""}
+          </div>
+          ${actionHTML}
+        `;
+
+        fileList.appendChild(item);
+      });
+    }
+
+    async function login() {
+      const nameInput = document.getElementById("name");
+      const passwordInput = document.getElementById("password");
+      const errorBox = document.getElementById("error");
+
+      const nombre = nameInput.value.trim();
+      const password = passwordInput.value.trim();
+      const client = clients[password];
+
+      if (!nombre) {
+        errorBox.textContent = "Escribe tu nombre y apellido.";
+        return;
+      }
+
+      if (!client) {
+        errorBox.textContent = "Contraseña incorrecta.";
+        return;
+      }
+
+      errorBox.textContent = "";
+
+      try {
+        await registrarAcceso(nombre, password, client.name);
+      } catch (error) {
+        console.error("Error al registrar el acceso:", error);
+      }
+
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("panel").classList.remove("hidden");
+      document.getElementById("clientName").textContent = "Bienvenido, " + nombre;
+      document.getElementById("sessionName").textContent = "Sesión: " + client.name;
+      document.getElementById("eventName").textContent = "Prueba: " + NOMBRE_PRUEBA;
+
+      renderFiles(client);
+      window.currentClient = client;
+    }
+
+    function logout() {
+      document.getElementById("name").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("panel").classList.add("hidden");
+      document.getElementById("loginBox").classList.remove("hidden");
+      document.getElementById("fileList").innerHTML = "";
+      document.getElementById("clientName").textContent = "";
+      document.getElementById("sessionName").textContent = "";
+      document.getElementById("eventName").textContent = "";
+      document.getElementById("error").textContent = "";
+      window.currentClient = null;
+    }
+
+    setInterval(() => {
+      const panelVisible = !document.getElementById("panel").classList.contains("hidden");
+      if (panelVisible && window.currentClient) {
+        renderFiles(window.currentClient);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
