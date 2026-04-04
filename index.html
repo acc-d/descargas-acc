@@ -247,7 +247,6 @@
 
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_uLxRKIZS6WlKj414tTwPELu4bsy_Mc8fZ2KUtRTwtL323cJ7gTC449szbDiBM5M/exec";
-    const NOMBRE_PRUEBA = "CRSTV | Rallysprint Misiones";
 
     function getSpainTime() {
       const now = new Date();
@@ -302,6 +301,7 @@
     const clients = {
       "75c18mis": {
         name: "Sesion C",
+        eventName: "CRSTV | Rallysprint Misiones",
         files: [
           {
             title: "Pack Skins",
@@ -347,6 +347,7 @@
 
       "903d7mis": {
         name: "Sesion D",
+        eventName: "CRSTV | Rallysprint Misiones",
         files: [
           {
             title: "Pack Skins",
@@ -386,6 +387,44 @@
             path: "https://acstuff.ru/s/q:race/online/join?httpPort=14106&ip=89.58.47.218",
             button: "Acceder al servidor",
             type: "link"
+          }
+        ]
+      },
+
+      "gen@acc45vol": {
+        name: "General",
+        eventName: "CRSV | Les Masies de Voltregà",
+        files: [
+          {
+            title: "Coches",
+            description: "Archivo comprimido con los coches que se necesitan para entrar al servidor de la prueba.",
+            path: "https://www.swisstransfer.com/d/b4cdc5f7-6712-496c-a24e-6d33821e9fcf",
+            button: "Descargar Coches",
+            type: "link"
+          },
+          {
+            title: "Tramo Shakedown",
+            description: "Archivo comprimido con el tramo de shakedown para poder hacerlo en el servidor y realizar tiempos para el orden de salida.",
+            path: "",
+            button: "Descargar Shakedown",
+            type: "link",
+            visibleFrom: "2026-04-07T12:00:00"
+          },
+          {
+            title: "Live-Timing Servidor",
+            description: "Enlace directo al live-timing del servidor oficial.",
+            path: "http://de1.acorsahostinges.de:12106/live-timing",
+            button: "Ir al live-timing",
+            type: "link",
+            visibleFrom: "2026-04-07T12:00:00"
+          },
+          {
+            title: "Enlace Directo Servidor",
+            description: "Enlace directo al servidor oficial.",
+            path: "https://acstuff.ru/s/q:race/online/join?httpPort=14106&ip=89.58.47.218",
+            button: "Acceder al servidor",
+            type: "link",
+            visibleFrom: "2026-04-07T12:00:00"
           }
         ]
       }
@@ -501,7 +540,7 @@
       document.getElementById("panel").classList.remove("hidden");
       document.getElementById("clientName").textContent = "Bienvenido, " + nombre;
       document.getElementById("sessionName").textContent = "Sesión: " + client.name;
-      document.getElementById("eventName").textContent = "Prueba: " + NOMBRE_PRUEBA;
+      document.getElementById("eventName").textContent = "Prueba: " + (client.eventName || "");
 
       renderFiles(client);
       window.currentClient = client;
