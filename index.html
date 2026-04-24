@@ -57,6 +57,62 @@
       padding: 28px;
     }
 
+    .page-title {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .page-subtitle {
+      margin: 0 0 20px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .option-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .option-card {
+      width: 100%;
+      text-align: left;
+      padding: 18px;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      background: #f9fafb;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .option-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      border-color: #2563eb;
+    }
+
+    .option-card h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      color: #1f2937;
+    }
+
+    .option-card p {
+      margin: 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .back-btn {
+      margin-bottom: 18px;
+      border: none;
+      background: transparent;
+      color: #2563eb;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
+    }
+
     .login-box label {
       display: block;
       margin-top: 14px;
@@ -205,11 +261,28 @@
   <div class="card">
     <div class="header">
       <h1>Área privada de pilotos ACC</h1>
-      <p>Introduce tus datos para acceder a los archivos de tu sesión.</p>
+      <p>Selecciona tu evento y sesión para acceder a tus archivos.</p>
     </div>
 
     <div class="content">
-      <div id="loginBox" class="login-box">
+      <div id="eventsPage">
+        <h2 class="page-title">Eventos disponibles</h2>
+        <p class="page-subtitle">Selecciona el evento al que quieres acceder.</p>
+        <div id="eventsList" class="option-list"></div>
+      </div>
+
+      <div id="sessionsPage" class="hidden">
+        <button class="back-btn" onclick="showEvents()">← Volver a eventos</button>
+        <h2 id="sessionsTitle" class="page-title"></h2>
+        <p class="page-subtitle">Selecciona tu sesión para continuar.</p>
+        <div id="sessionsList" class="option-list"></div>
+      </div>
+
+      <div id="loginBox" class="login-box hidden">
+        <button class="back-btn" onclick="showSessions()">← Volver a sesiones</button>
+        <h2 id="loginTitle" class="page-title"></h2>
+        <p id="loginSubtitle" class="page-subtitle"></p>
+
         <label for="name">Nombre y apellido</label>
         <input
           type="text"
@@ -221,7 +294,7 @@
         <input
           type="password"
           id="password"
-          placeholder="Escribe tu contraseña"
+          placeholder="Escribe la contraseña de tu sesión"
           onkeydown="if(event.key==='Enter'){login()}"
         />
 
@@ -299,52 +372,6 @@
     }
 
     const clients = {
-      "903d7mis": {
-        name: "Sesion D",
-        eventName: "CRSTV | Rallysprint Misiones",
-        files: [
-          {
-            title: "Pack Skins",
-            description: "Archivo comprimido con las skins de la sesión.",
-            path: "https://drive.google.com/file/d/1EoLgJuH15GDK8wUW_CR1eaKYt-qZpQXO/view?usp=sharing",
-            button: "Descargar Pack",
-            type: "link",
-            visibleFrom: "2026-04-05T14:00:00",
-            visibleUntil: "2026-04-05T16:50:00"
-          },
-          {
-            title: "Tramo",
-            description: "Archivo comprimido con el tramo de la prueba.",
-            path: "https://www.swisstransfer.com/d/6915d37f-a26b-4311-acce-a92e4315c6bc",
-            button: "Descargar Tramo",
-            type: "link",
-            visibleFrom: "2026-04-05T14:00:00",
-            visibleUntil: "2026-04-05T16:50:00"
-          },
-          {
-            title: "Coches",
-            description: "Archivo comprimido con los coches que se necesitan para entrar al servidor de la prueba.",
-            path: "https://www.swisstransfer.com/d/b876402a-f743-42b4-9205-bfcc8d757fdc",
-            button: "Descargar Coches",
-            type: "link"
-          },
-          {
-            title: "Live-Timing Servidor",
-            description: "Enlace directo al live-timing del servidor oficial.",
-            path: "http://de1.acorsahostinges.de:12106/live-timing",
-            button: "Ir al live-timing",
-            type: "link"
-          },
-          {
-            title: "Enlace Directo Servidor",
-            description: "Enlace directo al servidor oficial.",
-            path: "https://acstuff.ru/s/q:race/online/join?httpPort=14106&ip=89.58.47.218",
-            button: "Acceder al servidor",
-            type: "link"
-          }
-        ]
-      },
-
       "gen@acc45vol": {
         name: "General",
         eventName: "CRSV | Les Masies de Voltregà",
@@ -522,6 +549,107 @@
       },
     };
 
+    const events = {
+      "voltrega": {
+        name: "CRSV | Rallysprint Les Masies de Voltregà",
+        description: "Acceso a las sesiones y archivos del rally.",
+        sessions: ["gen@acc45vol", "8244g0vol", "0984i8vol", "3487q1vol"]
+      }
+    };
+
+    let selectedEventKey = null;
+    let selectedSessionKey = null;
+
+    function hideAllPages() {
+      document.getElementById("eventsPage").classList.add("hidden");
+      document.getElementById("sessionsPage").classList.add("hidden");
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("panel").classList.add("hidden");
+    }
+
+    function renderEvents() {
+      const eventsList = document.getElementById("eventsList");
+      eventsList.innerHTML = "";
+
+      Object.entries(events).forEach(([eventKey, event]) => {
+        const button = document.createElement("button");
+        button.className = "option-card";
+        button.onclick = () => openEvent(eventKey);
+        button.innerHTML = `
+          <h3>${event.name}</h3>
+          <p>${event.description}</p>
+        `;
+        eventsList.appendChild(button);
+      });
+    }
+
+    function showEvents() {
+      selectedEventKey = null;
+      selectedSessionKey = null;
+      window.currentClient = null;
+      document.getElementById("name").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("error").textContent = "";
+      hideAllPages();
+      document.getElementById("eventsPage").classList.remove("hidden");
+    }
+
+    function openEvent(eventKey) {
+      selectedEventKey = eventKey;
+      renderSessions(eventKey);
+      hideAllPages();
+      document.getElementById("sessionsPage").classList.remove("hidden");
+    }
+
+    function renderSessions(eventKey) {
+      const event = events[eventKey];
+      const sessionsList = document.getElementById("sessionsList");
+      sessionsList.innerHTML = "";
+      document.getElementById("sessionsTitle").textContent = event.name;
+
+      event.sessions.forEach(sessionKey => {
+        const session = clients[sessionKey];
+        if (!session) return;
+
+        const button = document.createElement("button");
+        button.className = "option-card";
+        button.onclick = () => openSession(sessionKey);
+        button.innerHTML = `
+          <h3>${session.name}</h3>
+          <p>${session.eventName || event.name}</p>
+        `;
+        sessionsList.appendChild(button);
+      });
+    }
+
+    function showSessions() {
+      if (!selectedEventKey) {
+        showEvents();
+        return;
+      }
+
+      selectedSessionKey = null;
+      document.getElementById("name").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("error").textContent = "";
+      hideAllPages();
+      document.getElementById("sessionsPage").classList.remove("hidden");
+    }
+
+    function openSession(sessionKey) {
+      selectedSessionKey = sessionKey;
+      const session = clients[sessionKey];
+
+      document.getElementById("loginTitle").textContent = session.name;
+      document.getElementById("loginSubtitle").textContent = session.eventName || "Introduce tus datos para acceder.";
+      document.getElementById("name").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("error").textContent = "";
+
+      hideAllPages();
+      document.getElementById("loginBox").classList.remove("hidden");
+    }
+
     async function registrarAcceso(nombre, password, sesion) {
       if (!APPS_SCRIPT_URL) {
         console.warn("Falta configurar APPS_SCRIPT_URL");
@@ -608,15 +736,20 @@
 
       const nombre = nameInput.value.trim();
       const password = passwordInput.value.trim();
-      const client = clients[password];
+      const client = selectedSessionKey ? clients[selectedSessionKey] : null;
+
+      if (!selectedSessionKey || !client) {
+        errorBox.textContent = "Selecciona primero una sesión.";
+        return;
+      }
 
       if (!nombre) {
         errorBox.textContent = "Escribe tu nombre y apellido.";
         return;
       }
 
-      if (!client) {
-        errorBox.textContent = "Contraseña incorrecta.";
+      if (password !== selectedSessionKey) {
+        errorBox.textContent = "Contraseña incorrecta para esta sesión.";
         return;
       }
 
@@ -628,7 +761,7 @@
         console.error("Error al registrar el acceso:", error);
       }
 
-      document.getElementById("loginBox").classList.add("hidden");
+      hideAllPages();
       document.getElementById("panel").classList.remove("hidden");
       document.getElementById("clientName").textContent = "Bienvenido, " + nombre;
       document.getElementById("sessionName").textContent = "Sesión: " + client.name;
@@ -641,14 +774,13 @@
     function logout() {
       document.getElementById("name").value = "";
       document.getElementById("password").value = "";
-      document.getElementById("panel").classList.add("hidden");
-      document.getElementById("loginBox").classList.remove("hidden");
       document.getElementById("fileList").innerHTML = "";
       document.getElementById("clientName").textContent = "";
       document.getElementById("sessionName").textContent = "";
       document.getElementById("eventName").textContent = "";
       document.getElementById("error").textContent = "";
       window.currentClient = null;
+      showEvents();
     }
 
     setInterval(() => {
@@ -657,6 +789,8 @@
         renderFiles(window.currentClient);
       }
     }, 1000);
+
+    renderEvents();
   </script>
 </body>
 </html>
